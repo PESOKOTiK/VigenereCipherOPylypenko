@@ -7,9 +7,20 @@ namespace VigenereCipher
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly char[] asciiCharacters = new char[95];
+
         public MainWindow()
         {
             InitializeComponent();
+            InitializeAsciiArray();
+        }
+
+        private void InitializeAsciiArray()
+        {
+            for (int i = 0; i < 95; i++)
+            {
+                asciiCharacters[i] = (char)(i + 32);
+            }
         }
 
         private void Encrypt_Click(object sender, RoutedEventArgs e)
@@ -46,13 +57,20 @@ namespace VigenereCipher
             for (int i = 0; i < text.Length; i++)
             {
                 int keyIndex = i % key.Length;
-                int encryptedValue = ((text[i] - 32) + (key[keyIndex] - 32)) % 95 + 32;
-                result[i] = (char)encryptedValue;
+                int textCharIndex = Array.IndexOf(asciiCharacters, text[i]);
+                int keyCharIndex = Array.IndexOf(asciiCharacters, key[keyIndex]);
+
+                if (textCharIndex == -1 || keyCharIndex == -1)
+                {
+                    result[i] = text[i];
+                }
+                else
+                {
+                    result[i] = asciiCharacters[(textCharIndex + keyCharIndex) % 95];
+                }
             }
             return new string(result);
         }
-
-
 
         private string DecryptVigenere(string text, string key)
         {
@@ -60,8 +78,17 @@ namespace VigenereCipher
             for (int i = 0; i < text.Length; i++)
             {
                 int keyIndex = i % key.Length;
-                int decryptedValue = ((text[i] - 32) - (key[keyIndex] - 32) + 95) % 95 + 32; //strange byte fix to avoid 
-                result[i] = (char)decryptedValue;                                       //bugs when ascii encrypt/decrypt
+                int textCharIndex = Array.IndexOf(asciiCharacters, text[i]);
+                int keyCharIndex = Array.IndexOf(asciiCharacters, key[keyIndex]);
+
+                if (textCharIndex == -1 || keyCharIndex == -1)
+                {
+                    result[i] = text[i];
+                }
+                else
+                {
+                    result[i] = asciiCharacters[(textCharIndex - keyCharIndex + 95) % 95];
+                }
             }
             return new string(result);
         }
